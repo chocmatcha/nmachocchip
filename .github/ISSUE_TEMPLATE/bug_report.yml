@@ -1,0 +1,39 @@
+name: 🐞 แจ้งบั๊ก (Bug Report)
+description: เจอบั๊กในเกมของทีมนี้? แจ้งเลย! (ได้แต้ม Bug Bounty)
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: steps
+    attributes:
+      label: 1. ทำอะไร (ขั้นตอนทำให้เกิดบั๊ก)
+      placeholder: "เช่น กดเริ่มเกม แล้วกดปุ่ม ← ค้างไว้ 5 วินาที"
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: 2. เกิดอะไรขึ้น
+      placeholder: "เช่น ตัวละครหลุดออกนอกจอ"
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 3. ควรจะเป็นอย่างไร
+      placeholder: "เช่น ตัวละครควรหยุดที่ขอบจอ"
+    validations:
+      required: true
+  - type: dropdown
+    id: device
+    attributes:
+      label: 4. เล่นบนอุปกรณ์อะไร
+      options:
+        - คอมพิวเตอร์
+        - มือถือ
+        - แท็บเล็ต
+  - type: input
+    id: reporter
+    attributes:
+      label: 5. ทีมที่แจ้ง
+      placeholder: "ชื่อทีมของคุณ (เพื่อนับแต้ม Bug Bounty)"

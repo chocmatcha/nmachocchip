@@ -1,0 +1,22 @@
+{
+  "name": "Vibe Game Jam",
+  "image": "mcr.microsoft.com/devcontainers/universal:2",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.live-server",
+        "GitHub.copilot",
+        "GitHub.copilot-chat"
+      ],
+      "settings": {
+        "editor.fontSize": 16,
+        "editor.wordWrap": "on",
+        "git.enableSmartCommit": true,
+        "git.confirmSync": false
+      }
+    }
+  },
+  "portsAttributes": {
+    "3000": { "label": "Game Preview", "onAutoForward": "openPreview" }
+  }
+}

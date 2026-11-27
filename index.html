@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- 🎮 TODO: เปลี่ยนชื่อเกมของทีมตรงนี้ -->
+  <title>My Vibe Game</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0b1d3a;
+      color: #fff;
+      font-family: "Sarabun", "Noto Sans Thai", system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 12px;
+      touch-action: none; /* กันหน้าจอเลื่อนตอนลากนิ้วบนมือถือ */
+    }
+    h1 { font-size: 1.6rem; margin: 8px 0; color: #ffb020; }
+    #hud { display: flex; gap: 24px; font-size: 1.2rem; margin-bottom: 8px; }
+    canvas {
+      background: linear-gradient(#1e5fa8, #0e3a6e);
+      border: 3px solid #ffb020;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 480px;
+      aspect-ratio: 3 / 4;
+    }
+    #help { margin-top: 8px; opacity: 0.8; font-size: 0.95rem; text-align: center; }
+  </style>
+</head>
+<body>
+  <!-- 🎮 TODO: เปลี่ยนชื่อเกมของทีมตรงนี้ด้วย -->
+  <h1>My Vibe Game</h1>
+  <div id="hud">
+    <span>⭐ คะแนน: <b id="score">0</b></span>
+  </div>
+  <canvas id="game" width="480" height="640"></canvas>
+  <p id="help">ใช้ปุ่มลูกศร ← ↑ → ↓ หรือ ลากนิ้วบนจอ เพื่อเก็บดาว</p>
+
+  <script>
+    // =========================================================
+    // 1) ตั้งค่าเกม  (ลองแก้ตัวเลขตรงนี้ด้วยมือดูได้เลย!)
+    // =========================================================
+    const PLAYER_SPEED = 5;     // ความเร็วผู้เล่น
+    const STAR_COUNT   = 3;     // จำนวนดาวบนจอพร้อมกัน
+    const PLAYER_EMOJI = "🦀";  // ตัวละครผู้เล่น
+    const STAR_EMOJI   = "⭐";  // ของที่ต้องเก็บ
+
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
+    const scoreEl = document.getElementById("score");
+
+    // =========================================================
+    // 2) ข้อมูลในเกม (state)
+    // =========================================================
+    let score = 0;
+    const player = { x: 240, y: 560, size: 48 };
+    let stars = [];
+    const keys = {};
+
+    function randomStar() {
+      return {
+        x: 30 + Math.random() * (canvas.width - 60),
+        y: 30 + Math.random() * (canvas.height - 160),
+        size: 36,
+      };
+    }
+    for (let i = 0; i < STAR_COUNT; i++) stars.push(randomStar());
+
+    // =========================================================
+    // 3) การควบคุม: คีย์บอร์ด + นิ้ว/เมาส์
+    // =========================================================
+    window.addEventListener("keydown", (e) => { keys[e.key] = true; });
+    window.addEventListener("keyup",   (e) => { keys[e.key] = false; });
+
+    function moveToPointer(e) {
+      const rect = canvas.getBoundingClientRect();
+      player.x = ((e.clientX - rect.left) / rect.width) * canvas.width;
+      player.y = ((e.clientY - rect.top) / rect.height) * canvas.height;
+    }
+    canvas.addEventListener("pointerdown", moveToPointer);
+    canvas.addEventListener("pointermove", (e) => { if (e.buttons) moveToPointer(e); });
+
+    // =========================================================
+    // 4) อัปเดตเกมทุกเฟรม
+    // =========================================================
+    function update() {
+      if (keys["ArrowLeft"])  player.x -= PLAYER_SPEED;
+      if (keys["ArrowRight"]) player.x += PLAYER_SPEED;
+      if (keys["ArrowUp"])    player.y -= PLAYER_SPEED;
+      if (keys["ArrowDown"])  player.y += PLAYER_SPEED;
+
+      // ไม่ให้ผู้เล่นหลุดขอบจอ
+      player.x = Math.max(24, Math.min(canvas.width - 24, player.x));
+      player.y = Math.max(24, Math.min(canvas.height - 24, player.y));
+
+      // ชนดาว = ได้คะแนน แล้วสุ่มดาวใหม่
+      stars.forEach((s, i) => {
+        const dist = Math.hypot(player.x - s.x, player.y - s.y);
+        if (dist < (player.size + s.size) / 2) {
+          score += 1;
+          scoreEl.textContent = score;
+          stars[i] = randomStar();
+        }
+      });
+    }
+
+    // =========================================================
+    // 5) วาดทุกอย่างลงจอ
+    // =========================================================
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+
+      stars.forEach((s) => {
+        ctx.font = s.size + "px serif";
+        ctx.fillText(STAR_EMOJI, s.x, s.y);
+      });
+
+      ctx.font = player.size + "px serif";
+      ctx.fillText(PLAYER_EMOJI, player.x, player.y);
+    }
+
+    // =========================================================
+    // 6) Game loop: update → draw → วนซ้ำ ~60 ครั้ง/วินาที
+    // =========================================================
+    function loop() {
+      update();
+      draw();
+      requestAnimationFrame(loop);
+    }
+    loop();
+  </script>
+</body>
+</html>
