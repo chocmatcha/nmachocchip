@@ -1,139 +1,266 @@
+
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- 🎮 TODO: เปลี่ยนชื่อเกมของทีมตรงนี้ -->
-  <title>My Vibe Game</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      background: #0b1d3a;
-      color: #fff;
-      font-family: "Sarabun", "Noto Sans Thai", system-ui, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-      padding: 12px;
-      touch-action: none; /* กันหน้าจอเลื่อนตอนลากนิ้วบนมือถือ */
-    }
-    h1 { font-size: 1.6rem; margin: 8px 0; color: #ffb020; }
-    #hud { display: flex; gap: 24px; font-size: 1.2rem; margin-bottom: 8px; }
-    canvas {
-      background: linear-gradient(#1e5fa8, #0e3a6e);
-      border: 3px solid #ffb020;
-      border-radius: 12px;
-      width: 100%;
-      max-width: 480px;
-      aspect-ratio: 3 / 4;
-    }
-    #help { margin-top: 8px; opacity: 0.8; font-size: 0.95rem; text-align: center; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAVE BEACH</title>
+
+<style>
+body {
+    text-align: center;
+    font-family: Arial;
+    background: #b8ecfa;
+    margin: 0;
+}
+
+h1 {
+    color: #087b55;
+    margin: 12px;
+}
+
+#info {
+    font-size: 20px;
+    font-weight: bold;
+    margin: 12px;
+}
+
+#game {
+    width: 95vw;
+    max-width: 800px;
+    height: 55vh;
+    min-height: 350px;
+    max-height: 500px;
+    margin: auto;
+    position: relative;
+    overflow: hidden;
+    border: 4px solid white;
+    border-radius: 15px;
+    background: linear-gradient(
+        to bottom,
+        #4fc8ee 0%,
+        #4fc8ee 20%,
+        #f4d99b 20%,
+        #f4d99b 100%
+    );
+}
+
+#turtle {
+    position: absolute;
+    font-size: 55px;
+    width: 65px;
+    height: 65px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 5;
+}
+
+.trash {
+    position: absolute;
+    font-size: 27px;
+}
+
+#controls {
+    margin: 15px auto;
+    display: grid;
+    grid-template-columns: 65px 65px 65px;
+    grid-template-rows: 55px 55px;
+    gap: 5px;
+    justify-content: center;
+}
+
+.move {
+    background: #087b55;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 28px;
+    touch-action: none;
+}
+
+.move:active {
+    background: #36a879;
+}
+
+#start {
+    padding: 12px 30px;
+    background: #087b55;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 20px;
+}
+
+#message {
+    font-weight: bold;
+    font-size: 18px;
+}
+</style>
 </head>
+
 <body>
-  <!-- 🎮 TODO: เปลี่ยนชื่อเกมของทีมตรงนี้ด้วย -->
-  <h1>My Vibe Game</h1>
-  <div id="hud">
-    <span>⭐ คะแนน: <b id="score">0</b></span>
-  </div>
-  <canvas id="game" width="480" height="640"></canvas>
-  <p id="help">ใช้ปุ่มลูกศร ← ↑ → ↓ หรือ ลากนิ้วบนจอ เพื่อเก็บดาว</p>
 
-  <script>
-    // =========================================================
-    // 1) ตั้งค่าเกม  (ลองแก้ตัวเลขตรงนี้ด้วยมือดูได้เลย!)
-    // =========================================================
-    const PLAYER_SPEED = 5;     // ความเร็วผู้เล่น
-    const STAR_COUNT   = 3;     // จำนวนดาวบนจอพร้อมกัน
-    const PLAYER_EMOJI = "🦀";  // ตัวละครผู้เล่น
-    const STAR_EMOJI   = "⭐";  // ของที่ต้องเก็บ
+<h1>🐢 SAVE BEACH 🌊</h1>
 
-    const canvas = document.getElementById("game");
-    const ctx = canvas.getContext("2d");
-    const scoreEl = document.getElementById("score");
+<div id="info">
+คะแนน: <span id="score">0</span>
+| เวลา: <span id="time">60</span>
+</div>
 
-    // =========================================================
-    // 2) ข้อมูลในเกม (state)
-    // =========================================================
-    let score = 0;
-    const player = { x: 240, y: 560, size: 48 };
-    let stars = [];
-    const keys = {};
+<div id="game">
+    <div id="turtle">🐢</div>
+</div>
 
-    function randomStar() {
-      return {
-        x: 30 + Math.random() * (canvas.width - 60),
-        y: 30 + Math.random() * (canvas.height - 160),
-        size: 36,
-      };
+<div id="controls">
+    <div></div>
+    <button class="move" data-dir="up">⬆️</button>
+    <div></div>
+
+    <button class="move" data-dir="left">⬅️</button>
+    <button class="move" data-dir="down">⬇️</button>
+    <button class="move" data-dir="right">➡️</button>
+</div>
+
+<button id="start" onclick="startGame()">เริ่มเกม</button>
+
+<p id="message">ช่วยเต่าเก็บขยะให้ชายหาดสะอาด!</p>
+
+<script>
+const game = document.getElementById("game");
+const turtle = document.getElementById("turtle");
+
+let x, y, score, time;
+let running = false;
+let trash = [];
+let timer;
+let moveInterval = null;
+let direction = null;
+
+const size = 65;
+
+function createTrash() {
+    let item = document.createElement("div");
+    item.className = "trash";
+
+    let red = Math.random() < 0.2;
+
+    item.textContent = red ? "🔴" : "🗑️";
+    item.dataset.type = red ? "red" : "normal";
+
+    item.style.left = Math.random() *
+        (game.clientWidth - 35) + "px";
+
+    item.style.top = (100 + Math.random() *
+        (game.clientHeight - 140)) + "px";
+
+    game.appendChild(item);
+    trash.push(item);
+}
+
+function startGame() {
+    clearInterval(timer);
+    clearInterval(moveInterval);
+
+    trash.forEach(t => t.remove());
+    trash = [];
+
+    score = 0;
+    time = 60;
+    x = 100;
+    y = 180;
+    running = true;
+
+    turtle.style.left = x + "px";
+    turtle.style.top = y + "px";
+
+    document.getElementById("score").textContent = score;
+    document.getElementById("time").textContent = time;
+    document.getElementById("message").textContent =
+        "แตะปุ่มลูกศรเพื่อบังคับเต่า!";
+
+    for (let i = 0; i < 15; i++) {
+        createTrash();
     }
-    for (let i = 0; i < STAR_COUNT; i++) stars.push(randomStar());
 
-    // =========================================================
-    // 3) การควบคุม: คีย์บอร์ด + นิ้ว/เมาส์
-    // =========================================================
-    window.addEventListener("keydown", (e) => { keys[e.key] = true; });
-    window.addEventListener("keyup",   (e) => { keys[e.key] = false; });
+    timer = setInterval(() => {
+        time--;
+        document.getElementById("time").textContent = time;
 
-    function moveToPointer(e) {
-      const rect = canvas.getBoundingClientRect();
-      player.x = ((e.clientX - rect.left) / rect.width) * canvas.width;
-      player.y = ((e.clientY - rect.top) / rect.height) * canvas.height;
-    }
-    canvas.addEventListener("pointerdown", moveToPointer);
-    canvas.addEventListener("pointermove", (e) => { if (e.buttons) moveToPointer(e); });
-
-    // =========================================================
-    // 4) อัปเดตเกมทุกเฟรม
-    // =========================================================
-    function update() {
-      if (keys["ArrowLeft"])  player.x -= PLAYER_SPEED;
-      if (keys["ArrowRight"]) player.x += PLAYER_SPEED;
-      if (keys["ArrowUp"])    player.y -= PLAYER_SPEED;
-      if (keys["ArrowDown"])  player.y += PLAYER_SPEED;
-
-      // ไม่ให้ผู้เล่นหลุดขอบจอ
-      player.x = Math.max(24, Math.min(canvas.width - 24, player.x));
-      player.y = Math.max(24, Math.min(canvas.height - 24, player.y));
-
-      // ชนดาว = ได้คะแนน แล้วสุ่มดาวใหม่
-      stars.forEach((s, i) => {
-        const dist = Math.hypot(player.x - s.x, player.y - s.y);
-        if (dist < (player.size + s.size) / 2) {
-          score += 1;
-          scoreEl.textContent = score;
-          stars[i] = randomStar();
+        if (time <= 0) {
+            running = false;
+            clearInterval(timer);
+            clearInterval(moveInterval);
+            document.getElementById("message").textContent =
+                "🎉 หมดเวลา! คะแนนของคุณคือ " + score;
         }
-      });
+    }, 1000);
+}
+
+function moveTurtle() {
+    if (!running || !direction) return;
+
+    if (direction === "up") y -= 5;
+    if (direction === "down") y += 5;
+    if (direction === "left") x -= 5;
+    if (direction === "right") x += 5;
+
+    x = Math.max(0, Math.min(game.clientWidth - size, x));
+    y = Math.max(70, Math.min(game.clientHeight - size, y));
+
+    turtle.style.left = x + "px";
+    turtle.style.top = y + "px";
+
+    collectTrash();
+}
+
+function collectTrash() {
+    let t = turtle.getBoundingClientRect();
+
+    for (let i = trash.length - 1; i >= 0; i--) {
+        let item = trash[i];
+        let r = item.getBoundingClientRect();
+
+        if (
+            t.left < r.right &&
+            t.right > r.left &&
+            t.top < r.bottom &&
+            t.bottom > r.top
+        ) {
+            score += item.dataset.type === "red" ? -1 : 1;
+
+            document.getElementById("score").textContent = score;
+
+            item.remove();
+            trash.splice(i, 1);
+            createTrash();
+        }
+    }
+}
+
+document.querySelectorAll(".move").forEach(button => {
+
+    button.addEventListener("pointerdown", e => {
+        e.preventDefault();
+        if (!running) return;
+
+        direction = button.dataset.dir;
+        clearInterval(moveInterval);
+
+        moveTurtle();
+        moveInterval = setInterval(moveTurtle, 30);
+    });
+
+    function stopMove() {
+        direction = null;
+        clearInterval(moveInterval);
     }
 
-    // =========================================================
-    // 5) วาดทุกอย่างลงจอ
-    // =========================================================
-    function draw() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
+    button.addEventListener("pointerup", stopMove);
+    button.addEventListener("pointerleave", stopMove);
+    button.addEventListener("pointercancel", stopMove);
+});
+</script>
 
-      stars.forEach((s) => {
-        ctx.font = s.size + "px serif";
-        ctx.fillText(STAR_EMOJI, s.x, s.y);
-      });
-
-      ctx.font = player.size + "px serif";
-      ctx.fillText(PLAYER_EMOJI, player.x, player.y);
-    }
-
-    // =========================================================
-    // 6) Game loop: update → draw → วนซ้ำ ~60 ครั้ง/วินาที
-    // =========================================================
-    function loop() {
-      update();
-      draw();
-      requestAnimationFrame(loop);
-    }
-    loop();
-  </script>
 </body>
 </html>
